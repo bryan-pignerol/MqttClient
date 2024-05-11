@@ -5,7 +5,7 @@
 
 
 // OBJECTS
-MqttSettings mqttSettings("address", "user", "password", "topic");
+MqttSettings mqttSettings("address broker", "user", "password", "topic");
 String wifiSsid = "wifi ssid";
 String wifiPassword = "wifi password";
 const unsigned long baudRate = 115200;
@@ -26,9 +26,4 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
 }

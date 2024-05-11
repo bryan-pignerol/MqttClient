@@ -11,6 +11,8 @@ String wifiPassword = "wifi password";
 const unsigned long baudRate = 115200;
 
 WiFiClient wifiClient;
+SpaIot::SpaServer spaServer;
+
 
 // FUNCTIONS
 void setup() {
@@ -22,8 +24,10 @@ void setup() {
   }
   Serial.println("Connected to the WiFi network");
   mqttClient.reconnect();
+
+  spaServer.addClient(mqttClient);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  spaServer.handle();
 }

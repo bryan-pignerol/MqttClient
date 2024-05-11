@@ -21,6 +21,7 @@ void setup() {
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to the WiFi network");
+  mqttClient.reconnect();
 }
 
 void loop() {

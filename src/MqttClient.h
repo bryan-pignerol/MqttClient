@@ -30,6 +30,7 @@ class MqttClientClass : public SpaIot::SpaClient {
         PubSubClient m_settings;
         mutable PubSubClient m_mqtt;
         static void callback(char* topic, byte* payload, unsigned int length);
+        static const std::map<SpaIot::Event::Type, String> TypeToString;
 };
 
 extern MqttClientClass mqttClient;

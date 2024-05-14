@@ -3,16 +3,18 @@
 #include <WiFi.h>
 #include "MqttClient.h"
 
+using namespace SpaIot;
 
 // OBJECTS
 MqttSettings mqttSettings("address broker", "user", "password", "topic");
-String wifiSsid = "wifi ssid";
-String wifiPassword = "wifi password";
+String wifiSsid = "wifi_ssid";
+String wifiPassword = "wifi_password";
 const unsigned long baudRate = 115200;
 
 WiFiClient wifiClient;
-SpaIot::SpaServer spaServer;
+SpaServer spaServer;
 
+ControlPanel spa ("SPAIOT32SSP");
 
 // FUNCTIONS
 void setup() {
@@ -26,6 +28,15 @@ void setup() {
   mqttClient.reconnect();
 
   spaServer.addClient(mqttClient);
+
+  mqttClient.begin(mqttSettings, wifiClient);
+
+  while(!spa.isOpen()) {
+    delay(1000);
+    Serial.println("Waiting for spa to open...");
+  }
+
+  Serial.println("Spa is open");
 }
 
 void loop() {

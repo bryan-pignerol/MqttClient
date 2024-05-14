@@ -58,6 +58,10 @@ void MqttClientClass::begin(const MqttSettings &settings, Client &client) {
     reconnect();
 }
 
+bool MqttClientClass::isOpen() const {
+    return m_mqtt.connected();
+}
+
 void MqttClientClass::reconnect() {
     // While not connected, call m_mqtt.connect()
     // If connected, call m_mqtt.subscribe()
@@ -78,10 +82,6 @@ void MqttClientClass::reconnect() {
     }
 }
 
-bool MqttClientClass::isOpen() const {
-    return m_mqtt.connected();
-}
-
 void MqttClientClass::callback(char *topic, byte *payload, unsigned int length) {
     String p;
     String t (topic);
@@ -95,6 +95,7 @@ void MqttClientClass::callback(char *topic, byte *payload, unsigned int length) 
     } else {
         e.setValue(p.toInt()); // Set e to 0 (string conversion without numbers return 0)
     }
+    mqttClient.pushToSpa(e);
 }
 
 bool MqttClientClass::handle() {
@@ -115,8 +116,20 @@ bool MqttClientClass::handle() {
         String payload;
 
         topic = m_settings.topic;
-        if(MqttTopic.count (e.type()) != 0)
-        m_mqtt.publish(topic.c_str(), payload.c_str());
+        if(MqttTopic.count (e.type()) != 0) {
+            topic += "/" + MqttTopic.at(e.type());
+            if (e.isBoolean()) {
+                payload = e.value() == true ? "on" : "off";
+            } else {
+                payload = String(e.value());
+            }
+
+            if (e.type() == Event::Type::PowerOn && e.value() == true) {
+                pushToSpa(Event(Event::Type::SetDesiredTemp, 0));
+            }
+
+            m_mqtt.publish(topic.c_str(), payload.c_str());
+        }
     }
     return true;
 }

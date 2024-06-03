@@ -68,7 +68,7 @@ void MqttClientClass::reconnect() {
 
     while(!m_mqtt.connected()) {
         Serial.println("Attempting MQTT connection...");
-        m_mqtt.connect("jeedom.btssn.lan", "jeedom", "W+pL(69g8u8$hY");
+        m_mqtt.connect(m_settings.server.c_str(), m_settings.username.c_str(), m_settings.password.c_str());
         if (m_mqtt.connected()) {
             Serial.println("Connected");
             m_mqtt.subscribe("spa");

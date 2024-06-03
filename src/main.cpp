@@ -29,11 +29,13 @@ ControlPanel spa ("SPAIOT32SSP");
 
 // FUNCTIONS
 void setup() {
+  // On définit l'ESP32 en point d'accès
   Serial.begin(baudRate);
   WiFi.mode(WIFI_AP);
   
   WiFi.softAP(ssid, password);
 
+  // L'ESP32 génère une page web dans laquelle l'utilisateur entrera les informations de son réseau wifi --> 192.168.4.1:80 (URL du site)
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     String s ="<html><body>";
     s += "<form action=\"/wifi\" method=\"post\">";
@@ -48,13 +50,14 @@ void setup() {
     request->send(200, "text/html", s);
   });
 
+  // Code effectuée quand l'on appuie sur le bouton en bas de la page web
   server.on("/wifi", HTTP_POST, [](AsyncWebServerRequest *request){
     int params = request->params();
     for(int i=0;i<params;i++){
       AsyncWebParameter* p = request->getParam(i);
       if(p->isPost()){
         if(p->name() == "ssid"){
-          // Connect to the provided ssid
+          // Connexion au réseau wifi
           WiFi.begin(p->value().c_str(), request->getParam("password", true)->value().c_str());
           wifiSsid = p->value().c_str();
           wifiPassword = request->getParam("password", true)->value().c_str();
@@ -62,8 +65,10 @@ void setup() {
           mqttPort = request->getParam("mqtt_port", true)->value().toInt();
           mqttUser = request->getParam("mqtt_username", true)->value().c_str();
           mqttPassword = request->getParam("mqtt_password", true)->value().c_str();
+          mqttSettings = MqttSettings(mqttBroker, mqttUser, mqttPassword, "spa");
           Serial.println(wifiSsid);
           Serial.println(wifiPassword);
+          mqttClient.reconnect();
         }
       }
     }
@@ -71,18 +76,17 @@ void setup() {
   });
 
   Serial.println("Connected to the WiFi network");
-  mqttClient.reconnect();
 
-  spaServer.addClient(mqttClient);
-
-  mqttClient.begin(mqttSettings, wifiClient);
-
+  // Connexion au Broker MQTT
   while(!spa.isOpen()) {
     delay(1000);
     Serial.println("Waiting for spa to open...");
   }
 
   Serial.println("Spa is open");
+  
+  mqttClient.begin(mqttSettings, wifiClient);
+  spaServer.addClient(mqttClient);
 }
 
 void loop() {
